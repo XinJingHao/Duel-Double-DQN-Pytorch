@@ -12,6 +12,7 @@ A quick render here:
 gym==0.18.3  
 numpy==1.21.2  
 pytorch==1.8.1  
+tensorboard==2.5.0
 
 ## How to use my code
 ### Train from scratch
