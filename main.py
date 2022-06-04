@@ -76,7 +76,7 @@ def main():
 
     if opt.render:
         score = evaluate_policy(eval_env, model, True, 20)
-        print('EnvName:', BriefEnvName[opt.EnvIdex], 'seed:', seed, 'score:', score)
+        print('EnvName:', BriefEnvName[opt.EnvIdex], 'seed:', opt.seed, 'score:', score)
     else:
         total_steps = 0
         while total_steps < opt.Max_train_steps:
