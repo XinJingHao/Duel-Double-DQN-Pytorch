@@ -17,7 +17,7 @@ parser.add_argument('--render', type=str2bool, default=False, help='Render or No
 parser.add_argument('--Loadmodel', type=str2bool, default=False, help='Load pretrained model or Not')
 parser.add_argument('--ModelIdex', type=int, default=250*1000, help='which model to load')
 
-parser.add_argument('--seed', type=int, default=532, help='random seed')
+parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--Max_train_steps', type=int, default=1e6, help='Max training steps')
 parser.add_argument('--save_interval', type=int, default=5e4, help='Model saving interval, in steps.')
 parser.add_argument('--eval_interval', type=int, default=1e3, help='Model evaluating interval, in steps.')
