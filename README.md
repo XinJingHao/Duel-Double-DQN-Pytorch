@@ -9,21 +9,38 @@ A quick render here:
 ![avatar](https://github.com/XinJingHao/DQN-DDQN-Pytorch/blob/main/IMGs/Render%20of%20DDQN.gif)
 
 ## Dependencies
+```bash
 gym==0.18.3  
 numpy==1.21.2  
 pytorch==1.8.1  
 tensorboard==2.5.0
+```
 
 ## How to use my code
 ### Train from scratch
-run **'python main.py'**, where the default enviroment is CartPole-v1.  
+
+```bash
+python main.py
+```
+where the default enviroment is CartPole-v1.  
+
+
 ### Play with trained model
-run **'python main.py --write False --render True --Loadmodel True --ModelIdex 50000'**  
+```bash
+python main.py --write False --render True --Loadmodel True --ModelIdex 50000
+```
+
 ### Change Enviroment
-If you want to train on different enviroments, just run **'python main.py --EnvIdex 1'**.  
+If you want to train on different enviroments
+```bash
+python main.py --EnvIdex 1
+```
 The --EnvIdex can be set to be 0 and 1, where   
+```bash
 '--EnvIdex 0' for 'CartPole-v1'  
 '--EnvIdex 1' for 'LunarLander-v2'   
+```
+
 ### Visualize the training curve
 You can use the tensorboard to visualize the training curve. History training curve is saved at '\runs'
 ### Hyperparameter Setting
