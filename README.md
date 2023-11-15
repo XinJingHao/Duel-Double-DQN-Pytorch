@@ -14,11 +14,14 @@ Here is the training curve:
 
 
 ## Dependencies
-```bash
-gym==0.18.3  
-numpy==1.21.2  
-pytorch==1.8.1  
-tensorboard==2.5.0
+```python
+gymnasium==0.29.1  
+box2d-py==2.3.5 
+numpy==1.26.1
+pytorch==2.1.0
+tensorboard==2.15.1
+
+python==3.11.5
 ```
 
 ## How to use my code
@@ -47,7 +50,7 @@ The --EnvIdex can be set to be 0 and 1, where
 ```
 
 ### Visualize the training curve
-You can use the tensorboard to visualize the training curve. History training curve is saved at '\runs'
+You can use the [tensorboard](https://pytorch.org/docs/stable/tensorboard.html) to visualize the training curve. History training curve is saved at '\runs'
 ### Hyperparameter Setting
 For more details of Hyperparameter Setting, please check 'main.py'
 ### References
