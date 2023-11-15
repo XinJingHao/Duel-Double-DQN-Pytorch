@@ -1,18 +1,17 @@
-def evaluate_policy(env, model, render, turns = 3):
-    scores = 0
+def evaluate_policy(env, agent, turns = 3):
+    total_scores = 0
     for j in range(turns):
-        s, done, ep_r, steps = env.reset(), False, 0, 0
+        s, info = env.reset()
+        done = False
         while not done:
             # Take deterministic actions at test time
-            a = model.select_action(s, deterministic=True)
-            s_prime, r, done, info = env.step(a)
-            ep_r += r
-            steps += 1
-            s = s_prime
-            if render:
-                env.render()
-        scores += ep_r
-    return int(scores/turns)
+            a = agent.select_action(s, deterministic=True)
+            s_next, r, dw, tr, info = env.step(a)
+            done = (dw or tr)
+
+            total_scores += r
+            s = s_next
+    return int(total_scores/turns)
 
 
 #You can just ignore this funciton. Is not related to the RL.
@@ -25,4 +24,5 @@ def str2bool(v):
     elif v.lower() in ('no', 'False','false','FALSE', 'f', 'n', '0'):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+        print('Wrong Input.')
+        raise
