@@ -1,9 +1,9 @@
 # DQN/DDQN-Pytorch
 This is a **clean and robust Pytorch implementation of DQN and Double DQN**. A quick render here:
 
-<div align="center">
-<img width="60%" height="auto" src="https://github.com/XinJingHao/DQN-DDQN-Pytorch/blob/main/IMGs/Render%20of%20DDQN.gif">
-</div>
+
+<img src="https://github.com/XinJingHao/DQN-DDQN-Pytorch/blob/main/IMGs/Render_CVP1.gif" width="90%" height="auto">  | <img src="https://github.com/XinJingHao/DQN-DDQN-Pytorch/blob/main/IMGs/Render%20of%20DDQN.gif" width="90%" height="auto">
+:-----------------------:|:-----------------------:|
 
 Here is the training curve:  
 
