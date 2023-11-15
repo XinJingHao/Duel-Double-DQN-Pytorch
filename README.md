@@ -48,6 +48,7 @@ The --EnvIdex can be set to be 0 and 1, where
 '--EnvIdex 0' for 'CartPole-v1'  
 '--EnvIdex 1' for 'LunarLander-v2'   
 ```
+if you want train on LunarLander-v2, you need to install [box2d-py](https://gymnasium.farama.org/environments/box2d/) first.
 
 ### Visualize the training curve
 You can use the [tensorboard](https://pytorch.org/docs/stable/tensorboard.html) to visualize the training curve. History training curve is saved at '\runs'
