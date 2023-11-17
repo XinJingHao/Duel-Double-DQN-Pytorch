@@ -1,9 +1,7 @@
-from torch.utils.tensorboard import SummaryWriter
 from utils import evaluate_policy, str2bool
 from datetime import datetime
 from DQN import DQN_agent
 import gymnasium as gym
-import numpy as np
 import os, shutil
 import argparse
 import torch
@@ -13,7 +11,7 @@ import torch
 parser = argparse.ArgumentParser()
 parser.add_argument('--dvc', type=str, default='cuda', help='running device: cuda or cpu')
 parser.add_argument('--EnvIdex', type=int, default=0, help='CP-v1, LLd-v2')
-parser.add_argument('--write', type=str2bool, default=True, help='Use SummaryWriter to record the training')
+parser.add_argument('--write', type=str2bool, default=False, help='Use SummaryWriter to record the training')
 parser.add_argument('--render', type=str2bool, default=False, help='Render or Not')
 parser.add_argument('--Loadmodel', type=str2bool, default=False, help='Load pretrained model or Not')
 parser.add_argument('--ModelIdex', type=int, default=250*1000, help='which model to load')
@@ -52,7 +50,6 @@ def main():
 
     # Seed Everything
     env_seed = opt.seed
-    np.random.seed(opt.seed)
     torch.manual_seed(opt.seed)
     torch.cuda.manual_seed(opt.seed)
     torch.backends.cudnn.deterministic = True
@@ -63,6 +60,7 @@ def main():
           '  action_dim:',opt.action_dim,'  Random Seed:',opt.seed, '  max_e_steps:',opt.max_e_steps, '\n')
 
     if opt.write:
+        from torch.utils.tensorboard import SummaryWriter
         timenow = str(datetime.now())[0:-10]
         timenow = ' ' + timenow[0:13] + '_' + timenow[-2::]
         writepath = 'runs/{}_{}'.format(algo_name,BriefEnvName[opt.EnvIdex]) + timenow
