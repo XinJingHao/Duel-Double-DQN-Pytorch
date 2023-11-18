@@ -86,7 +86,7 @@ def main():
             '''Interact & trian'''
             while not done:
                 #e-greedy exploration
-                if agent.replay_buffer.size < opt.random_steps: a = env.action_space.sample()
+                if total_steps < opt.random_steps: a = env.action_space.sample()
                 else: a = agent.select_action(s, deterministic=False)
                 s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
                 done = (dw or tr)
@@ -103,7 +103,7 @@ def main():
                     for j in range(opt.update_every): agent.train()
 
                 '''record & log'''
-                if (total_steps) % opt.eval_interval == 0:
+                if total_steps % opt.eval_interval == 0:
                     agent.exp_noise *= opt.noise_decay
                     score = evaluate_policy(eval_env, agent, turns = 3)
                     if opt.write:
@@ -113,7 +113,7 @@ def main():
                 total_steps += 1
 
                 '''save model'''
-                if (total_steps) % opt.save_interval == 0:
+                if total_steps % opt.save_interval == 0:
                     agent.save(algo_name,BriefEnvName[opt.EnvIdex],total_steps)
     env.close()
     eval_env.close()
