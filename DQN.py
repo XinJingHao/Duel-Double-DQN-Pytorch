@@ -6,23 +6,38 @@ import copy
 
 
 def build_net(layer_shape, activation, output_activation):
-	'''build net with for loop'''
+	'''Build networks with For loop'''
 	layers = []
 	for j in range(len(layer_shape)-1):
 		act = activation if j < len(layer_shape)-2 else output_activation
 		layers += [nn.Linear(layer_shape[j], layer_shape[j+1]), act()]
 	return nn.Sequential(*layers)
 
-
 class Q_Net(nn.Module):
 	def __init__(self, state_dim, action_dim, hid_shape):
 		super(Q_Net, self).__init__()
 		layers = [state_dim] + list(hid_shape) + [action_dim]
 		self.Q = build_net(layers, nn.ReLU, nn.Identity)
-
 	def forward(self, s):
 		q = self.Q(s)
 		return q
+
+
+class Duel_Q_Net(nn.Module):
+	def __init__(self, state_dim, action_dim, hid_shape):
+		super(Duel_Q_Net, self).__init__()
+		layers = [state_dim] + list(hid_shape)
+		self.hidden = build_net(layers, nn.ReLU, nn.ReLU)
+		self.V = nn.Linear(hid_shape[-1], 1)
+		self.A = nn.Linear(hid_shape[-1], action_dim)
+
+	def forward(self, s):
+		s = self.hidden(s)
+		Adv = self.A(s)
+		V = self.V(s)
+		Q = V + (Adv - torch.mean(Adv, dim=-1, keepdim=True))  # Q(s,a)=V(s)+A(s,a)-mean(A(s,a))
+		return Q
+
 
 class DQN_agent(object):
 	def __init__(self, **kwargs):
@@ -30,8 +45,10 @@ class DQN_agent(object):
 		self.__dict__.update(kwargs)
 		self.tau = 0.005
 		self.replay_buffer = ReplayBuffer(self.state_dim, self.dvc, max_size=int(1e6))
-
-		self.q_net = Q_Net(self.state_dim, self.action_dim, (self.net_width,self.net_width)).to(self.dvc)
+		if self.Duel:
+			self.q_net = Duel_Q_Net(self.state_dim, self.action_dim, (self.net_width,self.net_width)).to(self.dvc)
+		else:
+			self.q_net = Q_Net(self.state_dim, self.action_dim, (self.net_width, self.net_width)).to(self.dvc)
 		self.q_net_optimizer = torch.optim.Adam(self.q_net.parameters(), lr=self.lr)
 		self.q_target = copy.deepcopy(self.q_net)
 		# Freeze target networks with respect to optimizers (only update via polyak averaging)
@@ -56,12 +73,12 @@ class DQN_agent(object):
 
 		'''Compute the target Q value'''
 		with torch.no_grad():
-			if self.DDQN:
+			if self.Double:
 				argmax_a = self.q_net(s_next).argmax(dim=1).unsqueeze(-1)
-				max_q_prime = self.q_target(s_next).gather(1,argmax_a)
+				max_q_next = self.q_target(s_next).gather(1,argmax_a)
 			else:
-				max_q_prime = self.q_target(s_next).max(1)[0].unsqueeze(1)
-			target_Q = r + (~dw) * self.gamma * max_q_prime #dw: die or win
+				max_q_next = self.q_target(s_next).max(1)[0].unsqueeze(1)
+			target_Q = r + (~dw) * self.gamma * max_q_next #dw: die or win
 
 		# Get current Q estimates
 		current_q = self.q_net(s)

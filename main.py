@@ -14,22 +14,23 @@ parser.add_argument('--EnvIdex', type=int, default=0, help='CP-v1, LLd-v2')
 parser.add_argument('--write', type=str2bool, default=False, help='Use SummaryWriter to record the training')
 parser.add_argument('--render', type=str2bool, default=False, help='Render or Not')
 parser.add_argument('--Loadmodel', type=str2bool, default=False, help='Load pretrained model or Not')
-parser.add_argument('--ModelIdex', type=int, default=250*1000, help='which model to load')
+parser.add_argument('--ModelIdex', type=int, default=100*1000, help='which model to load')
 
 parser.add_argument('--seed', type=int, default=0, help='random seed')
 parser.add_argument('--Max_train_steps', type=int, default=int(1e6), help='Max training steps')
-parser.add_argument('--save_interval', type=int, default=int(5e4), help='Model saving interval, in steps.')
-parser.add_argument('--eval_interval', type=int, default=int(1e3), help='Model evaluating interval, in steps.')
+parser.add_argument('--save_interval', type=int, default=int(50e3), help='Model saving interval, in steps.')
+parser.add_argument('--eval_interval', type=int, default=int(2e3), help='Model evaluating interval, in steps.')
 parser.add_argument('--random_steps', type=int, default=int(3e3), help='steps for random policy to explore')
 parser.add_argument('--update_every', type=int, default=50, help='training frequency')
 
 parser.add_argument('--gamma', type=float, default=0.99, help='Discounted Factor')
 parser.add_argument('--net_width', type=int, default=200, help='Hidden net width')
 parser.add_argument('--lr', type=float, default=1e-4, help='Learning rate')
-parser.add_argument('--batch_size', type=int, default=512, help='lenth of sliced trajectory')
+parser.add_argument('--batch_size', type=int, default=256, help='lenth of sliced trajectory')
 parser.add_argument('--exp_noise', type=float, default=0.2, help='explore noise')
 parser.add_argument('--noise_decay', type=float, default=0.99, help='decay rate of explore noise')
-parser.add_argument('--DDQN', type=str2bool, default=True, help='True:DDQN; False:DQN')
+parser.add_argument('--Double', type=str2bool, default=True, help='Whether to use Double Q-learning')
+parser.add_argument('--Duel', type=str2bool, default=True, help='Whether to use Duel networks')
 opt = parser.parse_args()
 opt.dvc = torch.device(opt.dvc) # from str to torch.device
 print(opt)
@@ -44,9 +45,11 @@ def main():
     opt.action_dim = env.action_space.n
     opt.max_e_steps = env._max_episode_steps
 
-    #Use DDQN or DQN
-    if opt.DDQN: algo_name = 'DDQN'
-    else: algo_name = 'DQN'
+    #Algorithm Setting
+    if opt.Duel: algo_name = 'Duel'
+    else: algo_name = ''
+    if opt.Double: algo_name += 'DDQN'
+    else: algo_name += 'DQN'
 
     # Seed Everything
     env_seed = opt.seed
@@ -63,7 +66,7 @@ def main():
         from torch.utils.tensorboard import SummaryWriter
         timenow = str(datetime.now())[0:-10]
         timenow = ' ' + timenow[0:13] + '_' + timenow[-2::]
-        writepath = 'runs/{}_{}'.format(algo_name,BriefEnvName[opt.EnvIdex]) + timenow
+        writepath = 'runs/{}-{}_S{}_'.format(algo_name,BriefEnvName[opt.EnvIdex],opt.seed) + timenow
         if os.path.exists(writepath): shutil.rmtree(writepath)
         writer = SummaryWriter(log_dir=writepath)
 
@@ -91,20 +94,17 @@ def main():
                 s_next, r, dw, tr, info = env.step(a) # dw: dead&win; tr: truncated
                 done = (dw or tr)
 
-                if opt.EnvIdex == 1:
-                    if r <= -100: r = -10  # good for LunarLander
-
                 agent.replay_buffer.add(s, a, r, s_next, dw)
                 s = s_next
 
-                '''update if its time'''
+                '''Update'''
                 # train 50 times every 50 steps rather than 1 training per step. Better!
                 if total_steps >= opt.random_steps and total_steps % opt.update_every == 0:
                     for j in range(opt.update_every): agent.train()
 
-                '''record & log'''
+                '''Noise decay & Record & Log'''
+                if total_steps % 1000 == 0: agent.exp_noise *= opt.noise_decay
                 if total_steps % opt.eval_interval == 0:
-                    agent.exp_noise *= opt.noise_decay
                     score = evaluate_policy(eval_env, agent, turns = 3)
                     if opt.write:
                         writer.add_scalar('ep_r', score, global_step=total_steps)
@@ -114,7 +114,7 @@ def main():
 
                 '''save model'''
                 if total_steps % opt.save_interval == 0:
-                    agent.save(algo_name,BriefEnvName[opt.EnvIdex],total_steps)
+                    agent.save(algo_name,BriefEnvName[opt.EnvIdex],int(total_steps/1000))
     env.close()
     eval_env.close()
 
